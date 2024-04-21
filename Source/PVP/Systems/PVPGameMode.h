@@ -13,6 +13,10 @@ class APVPGameMode : public AGameModeBase
 
 public:
 	APVPGameMode();
+
+
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+	
 };
 
 
