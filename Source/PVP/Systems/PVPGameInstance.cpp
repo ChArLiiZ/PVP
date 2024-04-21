@@ -3,7 +3,6 @@
 
 #include "PVPGameInstance.h"
 
-#include "IContentBrowserSingleton.h"
 #include "OnlineSubsystem.h"
 #include "OnlineSubsystemUtils.h"
 #include "Kismet/GameplayStatics.h"
