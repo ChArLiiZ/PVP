@@ -170,8 +170,10 @@ void UPVPGameInstance::FindSessions(int32 MaxSearchResults, TArray<FBlueprintSes
 		if (SessionPtrRef)
 		{
 			SessionSearch = MakeShareable(new FOnlineSessionSearch);
-			SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, false, EOnlineComparisonOp::Equals);
+			//SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, false, EOnlineComparisonOp::Equals);
 			SessionSearch->MaxSearchResults = MaxSearchResults;
+			SessionSearch->bIsLanQuery = false;
+			SessionSearch->QuerySettings.SearchParams.Empty();
 			SessionPtrRef->OnFindSessionsCompleteDelegates.AddUObject(this, &UPVPGameInstance::OnFindSessionCompleted);
 			SessionPtrRef->FindSessions(0, SessionSearch.ToSharedRef());
 			TArray<FBlueprintSessionResult> BPResults;
