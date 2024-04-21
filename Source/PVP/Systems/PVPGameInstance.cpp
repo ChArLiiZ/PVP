@@ -148,7 +148,7 @@ void UPVPGameInstance::CreateEOSSession(bool bIsLan, int32 NumOfPublicConnection
 			SessionCreationInfo.bIsLANMatch = bIsLan;
 			SessionCreationInfo.bAllowInvites = true;
 			SessionCreationInfo.NumPublicConnections = NumOfPublicConnections;
-			SessionCreationInfo.bUseLobbiesIfAvailable = true;
+			SessionCreationInfo.bUseLobbiesIfAvailable = false;
 			SessionCreationInfo.bUsesPresence = false;
 			SessionCreationInfo.bShouldAdvertise = true;
 			SessionCreationInfo.Set(SEARCH_KEYWORDS, FString("PVP"), EOnlineDataAdvertisementType::ViaOnlineService);
@@ -170,7 +170,7 @@ void UPVPGameInstance::FindSessions(int32 MaxSearchResults, TArray<FBlueprintSes
 		if (SessionPtrRef)
 		{
 			SessionSearch = MakeShareable(new FOnlineSessionSearch);
-			SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, true, EOnlineComparisonOp::Equals);
+			SessionSearch->QuerySettings.Set(SEARCH_LOBBIES, false, EOnlineComparisonOp::Equals);
 			SessionSearch->MaxSearchResults = MaxSearchResults;
 			SessionPtrRef->OnFindSessionsCompleteDelegates.AddUObject(this, &UPVPGameInstance::OnFindSessionCompleted);
 			SessionPtrRef->FindSessions(0, SessionSearch.ToSharedRef());
