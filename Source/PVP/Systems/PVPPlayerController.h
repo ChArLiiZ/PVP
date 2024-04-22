@@ -14,8 +14,6 @@ class PVP_API APVPPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
-
-
 protected:
 	virtual void OnNetCleanup(UNetConnection* Connection) override;
 };
