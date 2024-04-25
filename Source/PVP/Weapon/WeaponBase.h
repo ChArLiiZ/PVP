@@ -3,8 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PVPCharacter.h"
 #include "GameFramework/Actor.h"
+#include "PVP/PVPCharacter.h"
+#include "PVP/DataAssets/WeaponInfos.h"
 #include "WeaponBase.generated.h"
 
 
@@ -24,8 +25,11 @@ public:
 	AWeaponBase();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UWeaponInfos WeaponInfo;
+	
+	UPROPERTY(Category="Attributes")
 	TEnumAsByte<EWeaponTypes> WeaponType;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(Category="Attributes")
 	FName SocketName;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -35,9 +39,14 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn), Replicated)
 	APVPCharacter* OwnerRef;
+	
 
 	UFUNCTION(BlueprintNativeEvent)
 	void InitialSetup();
+
+	UFUNCTION()
+	void LoadWeaponInfos();
+	
 
 
 	

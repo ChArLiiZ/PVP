@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActorComponents/CombatComponent.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "Weapon/WeaponBase.h"
 #include "PVPCharacter.generated.h"
 
 class USpringArmComponent;
@@ -23,6 +25,8 @@ class APVPCharacter : public ACharacter
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom;
+
+	
 
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -46,7 +50,13 @@ class APVPCharacter : public ACharacter
 
 public:
 	APVPCharacter();
-	
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ActorComponents")
+	UCombatComponent* CombatComponent;
+
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	AWeaponBase* WeaponRef;
 
 protected:
 
@@ -63,6 +73,8 @@ protected:
 	
 	// To add mapping context
 	virtual void BeginPlay();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	/** Returns CameraBoom subobject **/

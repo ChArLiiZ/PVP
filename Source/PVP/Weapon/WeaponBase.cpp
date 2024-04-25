@@ -23,10 +23,16 @@ AWeaponBase::AWeaponBase()
 
 void AWeaponBase::InitialSetup_Implementation()
 {
+	SocketName = WeaponInfo.Attributes.SocketName;
 	SKMesh->AttachToComponent(OwnerRef->GetMesh(),
 		FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
 	
 	
+}
+
+void AWeaponBase::LoadWeaponInfos()
+{
+	WeaponType = WeaponInfo.Attributes.WeaponType;
 }
 
 // Called when the game starts or when spawned
