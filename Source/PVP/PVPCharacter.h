@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "ActorComponents/CombatComponent.h"
+#include "Components/MaterialBillboardComponent.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "PVPCharacter.generated.h"
@@ -81,9 +82,12 @@ public:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_LockTarget)
 	AActor* LockTargetRef;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* LockedIcon;
 
-	UFUNCTION()
-	void OnRep_LockTarget();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnRep_LockTarget(AActor* PreviousTarget);
 
 	UFUNCTION(BlueprintCallable)
 	void SetLockTarget(AActor* LockTarget);

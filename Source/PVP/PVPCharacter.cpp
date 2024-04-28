@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Components/MaterialBillboardComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
@@ -53,6 +54,9 @@ APVPCharacter::APVPCharacter()
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("HealthComponent"));
+
+	LockedIcon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LockedIcon"));
+	LockedIcon->SetVisibility(false);
 	
 	
 }
@@ -108,24 +112,28 @@ void APVPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	}
 }
 
-void APVPCharacter::OnRep_LockTarget()
+void APVPCharacter::OnRep_LockTarget_Implementation(AActor* PreviousTarget)
 {
 	if (LockTargetRef == nullptr)
 	{
 		GetCharacterMovement()->bOrientRotationToMovement = true;
 		GetCharacterMovement()->bUseControllerDesiredRotation = false;
+		GetCharacterMovement()->MaxWalkSpeed = 500;
+		
 	}
 	else
 	{
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		GetCharacterMovement()->bUseControllerDesiredRotation = true;
+		GetCharacterMovement()->MaxWalkSpeed = 375;
 	}
 }
 
 void APVPCharacter::SetLockTarget(AActor* LockTarget)
 {
+	AActor* PreviousTarget = LockTargetRef;
 	LockTargetRef = LockTarget;
-	OnRep_LockTarget();
+	OnRep_LockTarget(PreviousTarget);
 }
 
 void APVPCharacter::LockToTarget()
@@ -134,7 +142,8 @@ void APVPCharacter::LockToTarget()
 	{
 		if (Controller != nullptr)
 		{
-			Controller->SetControlRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTargetRef->GetActorLocation()));
+			Controller->SetControlRotation(UKismetMathLibrary::FindLookAtRotation
+				(GetActorLocation(), LockTargetRef->GetActorLocation()) + FRotator(-12, 0, 0));
 			if (LockTargetRef->GetDistanceTo(this) > 1000)
 			{
 				SetLockTarget(nullptr);
@@ -171,7 +180,10 @@ void APVPCharacter::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
-
+	if (LockTargetRef)
+	{
+		return;
+	}
 	if (Controller != nullptr)
 	{
 		// add yaw and pitch input to controller
