@@ -3,10 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "ActorComponents/CombatComponent.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
-#include "Weapon/WeaponBase.h"
 #include "PVPCharacter.generated.h"
 
 class USpringArmComponent;
@@ -14,8 +14,28 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
+class AWeaponBase;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
+
+
+UENUM(BlueprintType, Blueprintable)
+enum EInputType
+{
+	Triggered,
+	Started,
+	Ongoing,
+	Canceled,
+	Completed
+};
+
+UENUM(BlueprintType, Blueprintable)
+enum EPlayerCharacter
+{
+	Yoll
+};
+
+
 
 UCLASS(config=Game)
 class APVPCharacter : public ACharacter
@@ -35,10 +55,7 @@ class APVPCharacter : public ACharacter
 	/** MappingContext */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
-
-	/** Jump Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* JumpAction;
+	
 
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -55,8 +72,27 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ActorComponents")
 	UCombatComponent* CombatComponent;
 
-	UPROPERTY(BlueprintReadOnly, Replicated)
+	UPROPERTY(BlueprintReadWrite, Replicated)
 	AWeaponBase* WeaponRef;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGameplayTagContainer TagContainer;
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_LockTarget)
+	AActor* LockTargetRef;
+
+
+	UFUNCTION()
+	void OnRep_LockTarget();
+
+	UFUNCTION(BlueprintCallable)
+	void SetLockTarget(AActor* LockTarget);
+
+	UFUNCTION()
+	void LockToTarget();
+
+
+
 
 protected:
 
@@ -73,6 +109,7 @@ protected:
 	
 	// To add mapping context
 	virtual void BeginPlay();
+	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 

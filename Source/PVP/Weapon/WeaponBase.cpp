@@ -3,7 +3,13 @@
 
 #include "WeaponBase.h"
 
+#include "AsyncTreeDifferences.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "PVP/PVPCharacter.h"
+#include "PVP/DataAssets/WeaponInfos.h"
+
 
 
 // Sets default values
@@ -23,16 +29,60 @@ AWeaponBase::AWeaponBase()
 
 void AWeaponBase::InitialSetup_Implementation()
 {
-	SocketName = WeaponInfo.Attributes.SocketName;
-	SKMesh->AttachToComponent(OwnerRef->GetMesh(),
-		FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
 	
+	SKMesh->AttachToComponent(OwnerRef->GetMesh(),
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponInfo->Attributes.SocketName);
+	
+	SetOwner(OwnerRef->Owner);
+}
+
+
+UAnimMontage* AWeaponBase::BasicAttack(EInputType InputType, float ElapsedSeconds, float TriggeredSeconds)
+{
+	int32 MontageIndex = 0;
+
+	if (InputType != Started)
+	{
+		return nullptr;
+	}
+	
+	if (OwnerRef->TagContainer.HasTag(WeaponInfo->Animations.BasicAttackingTag) || OwnerRef->TagContainer.HasTag(WeaponInfo->Animations.SprintingTag))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't Basic Attack"));
+		return nullptr;
+	}
+	
+	for (UAnimMontage* PlayingMontage : WeaponInfo->Animations.BasicAttacks)
+	{
+		if (OwnerRef->GetCurrentMontage() == PlayingMontage)
+		{
+			MontageIndex = WeaponInfo->Animations.BasicAttacks.FindLast(PlayingMontage) + 1;
+			break;
+		}
+	}
+
+	if (MontageIndex >= WeaponInfo->Animations.BasicAttacks.Num())
+	{
+		MontageIndex = 0;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Play Basic Attack %i"), MontageIndex);
+	return WeaponInfo->Animations.BasicAttacks[MontageIndex];
 	
 }
 
-void AWeaponBase::LoadWeaponInfos()
+UAnimMontage* AWeaponBase::Sprint(EInputType InputType, FVector InputVector)
 {
-	WeaponType = WeaponInfo.Attributes.WeaponType;
+	
+	if (OwnerRef->GetCharacterMovement()->IsFalling() || OwnerRef->TagContainer.HasTag(WeaponInfo->Animations.SprintingTag))
+	{
+		return nullptr;
+	}
+	if (InputVector.Length() >= 0)
+	{
+		OwnerRef->SetActorRotation(UKismetMathLibrary::MakeRotFromX(InputVector));
+	}
+	
+	return WeaponInfo->Animations.Sprint;
 }
 
 // Called when the game starts or when spawned

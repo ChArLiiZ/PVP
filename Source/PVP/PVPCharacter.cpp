@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -71,10 +72,17 @@ void APVPCharacter::BeginPlay()
 	}
 }
 
+void APVPCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	LockToTarget();
+}
+
 void APVPCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(APVPCharacter, WeaponRef);
+	DOREPLIFETIME(APVPCharacter, LockTargetRef);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -86,8 +94,7 @@ void APVPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 		
 		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+		
 
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APVPCharacter::Move);
@@ -100,6 +107,42 @@ void APVPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
+
+void APVPCharacter::OnRep_LockTarget()
+{
+	if (LockTargetRef == nullptr)
+	{
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+		GetCharacterMovement()->bUseControllerDesiredRotation = false;
+	}
+	else
+	{
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	}
+}
+
+void APVPCharacter::SetLockTarget(AActor* LockTarget)
+{
+	LockTargetRef = LockTarget;
+	OnRep_LockTarget();
+}
+
+void APVPCharacter::LockToTarget()
+{
+	if (LockTargetRef != nullptr)
+	{
+		if (Controller != nullptr)
+		{
+			Controller->SetControlRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LockTargetRef->GetActorLocation()));
+			if (LockTargetRef->GetDistanceTo(this) > 1000)
+			{
+				SetLockTarget(nullptr);
+			}
+		}
+	}
+}
+
 
 void APVPCharacter::Move(const FInputActionValue& Value)
 {

@@ -4,16 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "PVP/PVPCharacter.h"
 #include "PVP/DataAssets/WeaponInfos.h"
 #include "WeaponBase.generated.h"
 
+class APVPCharacter;
+enum EInputType : int;
 
-UENUM(Blueprintable, BlueprintType)
-enum EWeaponTypes
-{
-	Katana
-};
+
+
 
 UCLASS()
 class PVP_API AWeaponBase : public AActor
@@ -25,12 +23,8 @@ public:
 	AWeaponBase();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	UWeaponInfos WeaponInfo;
+	UWeaponInfos* WeaponInfo;
 	
-	UPROPERTY(Category="Attributes")
-	TEnumAsByte<EWeaponTypes> WeaponType;
-	UPROPERTY(Category="Attributes")
-	FName SocketName;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* SKMesh;
@@ -44,10 +38,12 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void InitialSetup();
 
-	UFUNCTION()
-	void LoadWeaponInfos();
+	UFUNCTION(BlueprintCallable)
+	UAnimMontage* BasicAttack(EInputType InputType, float ElapsedSeconds, float TriggeredSeconds);
 	
-
+	
+	UFUNCTION(BlueprintCallable)
+	UAnimMontage* Sprint(EInputType InputType, FVector InputVector);
 
 	
 
