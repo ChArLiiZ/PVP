@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "ActorComponents/CombatComponent.h"
+#include "ActorComponents/TagContainerComponent.h"
 #include "Components/MaterialBillboardComponent.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
@@ -77,7 +78,7 @@ public:
 	AWeaponBase* WeaponRef;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FGameplayTagContainer TagContainer;
+	UTagContainerComponent* TagComponent;
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_LockTarget)
 	AActor* LockTargetRef;

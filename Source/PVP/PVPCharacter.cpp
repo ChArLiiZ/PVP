@@ -56,8 +56,10 @@ APVPCharacter::APVPCharacter()
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("HealthComponent"));
 
 	LockedIcon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LockedIcon"));
+	LockedIcon->SetupAttachment(RootComponent);
 	LockedIcon->SetVisibility(false);
-	
+
+	TagComponent = CreateDefaultSubobject<UTagContainerComponent>(TEXT("TagContainer"));
 	
 }
 
@@ -140,14 +142,16 @@ void APVPCharacter::LockToTarget()
 {
 	if (LockTargetRef != nullptr)
 	{
+		if (LockTargetRef->GetDistanceTo(this) > 1000)
+		{
+			SetLockTarget(nullptr);
+			return;
+		}
 		if (Controller != nullptr)
 		{
 			Controller->SetControlRotation(UKismetMathLibrary::FindLookAtRotation
 				(GetActorLocation(), LockTargetRef->GetActorLocation()) + FRotator(-12, 0, 0));
-			if (LockTargetRef->GetDistanceTo(this) > 1000)
-			{
-				SetLockTarget(nullptr);
-			}
+			
 		}
 	}
 }

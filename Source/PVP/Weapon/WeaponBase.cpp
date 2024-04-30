@@ -34,6 +34,7 @@ void AWeaponBase::InitialSetup_Implementation()
 		FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponInfo->Attributes.SocketName);
 	
 	SetOwner(OwnerRef->Owner);
+	OwnerRef->CombatComponent->BaseDamage = WeaponInfo->Attributes.BaseDamage;
 }
 
 
@@ -46,7 +47,8 @@ UAnimMontage* AWeaponBase::BasicAttack(EInputType InputType, float ElapsedSecond
 		return nullptr;
 	}
 	
-	if (OwnerRef->TagContainer.HasTag(WeaponInfo->Animations.BasicAttackingTag) || OwnerRef->TagContainer.HasTag(WeaponInfo->Animations.SprintingTag))
+	if (OwnerRef->TagComponent->TagContainer.HasTag(WeaponInfo->Animations.BasicAttackingTag)
+		|| OwnerRef->TagComponent->TagContainer.HasTag(WeaponInfo->Animations.SprintingTag))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can't Basic Attack"));
 		return nullptr;
@@ -67,13 +69,14 @@ UAnimMontage* AWeaponBase::BasicAttack(EInputType InputType, float ElapsedSecond
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Play Basic Attack %i"), MontageIndex);
 	return WeaponInfo->Animations.BasicAttacks[MontageIndex];
+
 	
 }
 
 UAnimMontage* AWeaponBase::Sprint(EInputType InputType, FVector InputVector)
 {
 	
-	if (OwnerRef->GetCharacterMovement()->IsFalling() || OwnerRef->TagContainer.HasTag(WeaponInfo->Animations.SprintingTag))
+	if (OwnerRef->GetCharacterMovement()->IsFalling() || OwnerRef->TagComponent->TagContainer.HasTag(WeaponInfo->Animations.SprintingTag))
 	{
 		return nullptr;
 	}
