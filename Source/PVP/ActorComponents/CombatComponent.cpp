@@ -3,7 +3,6 @@
 
 #include "CombatComponent.h"
 
-#include <functional>
 
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
@@ -16,6 +15,7 @@ UCombatComponent::UCombatComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 	SetIsReplicated(true);
+	
 	
 	// ...
 }
@@ -100,6 +100,8 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UCombatComponent, CurrentHealth);
+	DOREPLIFETIME(UCombatComponent, CurrentStamina);
+	DOREPLIFETIME(UCombatComponent, TagContainer);
 }
 
 
@@ -130,7 +132,7 @@ void UCombatComponent::Timer_Trace()
 	//UE_LOG(LogTemp, Warning, TEXT("Attack Tracing"));
 	TArray<FTraceInfo> TraceInfoArray;
 	TraceInfos.GenerateValueArray(TraceInfoArray);
-	for (TTuple<FName, FTraceInfo> TraceInfo : &TraceInfos)
+	for (TTuple<FName, FTraceInfo> TraceInfo : TraceInfos)
 	{
 		TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypesArray;
 		ObjectTypesArray.Add(TraceInfo.Value.ObjectType);
@@ -144,30 +146,43 @@ void UCombatComponent::Timer_Trace()
 			ObjectTypesArray,
 			false,
 			ActorsIgnore,
-			EDrawDebugTrace::ForDuration,
+			EDrawDebugTrace::None,        //Debug
 			HitResults,
 			true
 			);
 		for (FHitResult HitResult : HitResults)
 		{
-			if (!TraceInfo.Value.HitActors.Contains(HitResult.GetActor()))
+			if (!TraceInfos.Find(TraceInfo.Key)->HitActors.Contains(HitResult.GetActor()))
 			{
-				TraceInfo.Value.HitActors.AddUnique(HitResult.GetActor());
-				for (AActor* Actors : TraceInfo.Value.HitActors)
+				TraceInfos.Find(TraceInfo.Key)->HitActors.AddUnique(HitResult.GetActor());
+				
+				UE_LOG(LogTemp, Warning, TEXT("Hit %s"), *HitResult.GetActor()->GetName());
+				if (UCombatComponent* TargetCombatComponent = Cast<UCombatComponent>
+					(HitResult.GetActor()->GetComponentByClass(UCombatComponent::StaticClass())))
 				{
-					UE_LOG(LogTemp, Warning, TEXT("%s"), *Actors->GetName());
+					if (TargetCombatComponent->TagContainer.HasTag(GuardingTag))
+					{
+						TargetCombatComponent->OnGuardDelegate.Broadcast(this, HitResult, TraceInfo.Value.ImpactType);
+						OnHitDelegate.Broadcast(HitResult, true);
+					}
+					else
+					{
+						TargetCombatComponent->SV_DealDamage(BaseDamage * TraceInfo.Value.DamageRatio,
+														HitResult, this, TraceInfo.Value.ImpactType);
+						OnHitDelegate.Broadcast(HitResult, false);
+					}
+					
 				}
-				//UE_LOG(LogTemp, Warning, TEXT("Hit %s"), *HitResult.GetActor()->GetName());
+				
 			}
-			
 		}
-		
-			
-			
-		
 	}
-	
-	
-	
+}
+
+void UCombatComponent::SV_DealDamage_Implementation(float amount, FHitResult HitResult, UCombatComponent* Source, EImpactTypes ImpactType)
+{
+	GetHitDelegate.Broadcast(Source, HitResult, amount, ImpactType);
+	SV_AddHealth(amount * -1);
+	UE_LOG(LogTemp, Warning, TEXT("%s Deal %f Damage To %s"), *Source->GetOwner()->GetName(), amount, *GetOwner()->GetName());
 }
 

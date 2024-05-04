@@ -3,14 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "CombatComponent.generated.h"
 
+class UTagContainerComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedDelegate, float, Before, float, After);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStaminaChangedDelegate, float, Before, float, After);
-
+UENUM(Blueprintable, BlueprintType)
+enum EImpactTypes
+{
+	None,
+	Stagger,
+	KnockDown
+};
 
 USTRUCT(Blueprintable, BlueprintType)
 struct FTraceInfo
@@ -25,6 +30,10 @@ struct FTraceInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DamageRatio;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TEnumAsByte<EImpactTypes> ImpactType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 KnockBackLevel;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName Start;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName End;
@@ -36,6 +45,17 @@ struct FTraceInfo
 	TEnumAsByte<EObjectTypeQuery> ObjectType;
 	
 };
+
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedDelegate, float, Before, float, After);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStaminaChangedDelegate, float, Before, float, After);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FGetHitDelegate, UCombatComponent*, Source, FHitResult, HitResult, float, Damage, EImpactTypes, ImpactType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGuardDelegate, UCombatComponent*, Source, FHitResult, HitResult, EImpactTypes, ImpactType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHitDelegate, FHitResult, HitResult, bool, IsGuarded);
+
+
+
+
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable, BlueprintType)
@@ -63,6 +83,23 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<FName, FTraceInfo> TraceInfos;
+
+	//Tags
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tags", Replicated)
+	FGameplayTagContainer TagContainer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Tags")
+	FGameplayTag BasicAttackingTag;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Tags")
+	FGameplayTagContainer CantBasicAttackTags;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Tags")
+	FGameplayTag SprintingTag;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Tags")
+	FGameplayTagContainer CantSprintTags;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Tags")
+	FGameplayTag GuardingTag;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Tags")
+	FGameplayTagContainer CantGuardTags;
 	
 
 	//Delegates
@@ -70,6 +107,12 @@ public:
 	FOnHealthChangedDelegate OnHealthChangedDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FOnStaminaChangedDelegate OnStaminaChangedDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FGetHitDelegate GetHitDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnGuardDelegate OnGuardDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnHitDelegate OnHitDelegate;
 
 
 
@@ -101,6 +144,9 @@ public:
 	
 	UFUNCTION()
 	void Timer_Trace();
+
+	UFUNCTION(BlueprintCallable, Category="Combat", Server, Reliable)
+	void SV_DealDamage(float amount, FHitResult HitResult, UCombatComponent* Source, EImpactTypes ImpactType);
 	
 protected:
 	

@@ -59,7 +59,7 @@ APVPCharacter::APVPCharacter()
 	LockedIcon->SetupAttachment(RootComponent);
 	LockedIcon->SetVisibility(false);
 
-	TagComponent = CreateDefaultSubobject<UTagContainerComponent>(TEXT("TagContainer"));
+	
 	
 }
 

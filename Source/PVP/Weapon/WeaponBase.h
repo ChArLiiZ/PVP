@@ -45,6 +45,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UAnimMontage* Sprint(EInputType InputType, FVector InputVector);
 
+	UFUNCTION(BlueprintCallable)
+	void Guard(EInputType InputType);
+
 	
 
 protected:

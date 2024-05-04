@@ -3,7 +3,6 @@
 
 #include "WeaponBase.h"
 
-#include "AsyncTreeDifferences.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
@@ -47,10 +46,10 @@ UAnimMontage* AWeaponBase::BasicAttack(EInputType InputType, float ElapsedSecond
 		return nullptr;
 	}
 	
-	if (OwnerRef->TagComponent->TagContainer.HasTag(WeaponInfo->Animations.BasicAttackingTag)
-		|| OwnerRef->TagComponent->TagContainer.HasTag(WeaponInfo->Animations.SprintingTag))
+	if (OwnerRef->GetCharacterMovement()->IsFalling() ||
+		OwnerRef->CombatComponent->TagContainer.HasAny(OwnerRef->CombatComponent->CantBasicAttackTags))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Can't Basic Attack"));
+		//UE_LOG(LogTemp, Warning, TEXT("Can't Basic Attack"));
 		return nullptr;
 	}
 	
@@ -67,7 +66,7 @@ UAnimMontage* AWeaponBase::BasicAttack(EInputType InputType, float ElapsedSecond
 	{
 		MontageIndex = 0;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Play Basic Attack %i"), MontageIndex);
+	//UE_LOG(LogTemp, Warning, TEXT("Play Basic Attack %i"), MontageIndex);
 	return WeaponInfo->Animations.BasicAttacks[MontageIndex];
 
 	
@@ -76,7 +75,8 @@ UAnimMontage* AWeaponBase::BasicAttack(EInputType InputType, float ElapsedSecond
 UAnimMontage* AWeaponBase::Sprint(EInputType InputType, FVector InputVector)
 {
 	
-	if (OwnerRef->GetCharacterMovement()->IsFalling() || OwnerRef->TagComponent->TagContainer.HasTag(WeaponInfo->Animations.SprintingTag))
+	if (OwnerRef->GetCharacterMovement()->IsFalling() ||
+		OwnerRef->CombatComponent->TagContainer.HasAny(OwnerRef->CombatComponent->CantSprintTags))
 	{
 		return nullptr;
 	}
@@ -86,6 +86,25 @@ UAnimMontage* AWeaponBase::Sprint(EInputType InputType, FVector InputVector)
 	}
 	
 	return WeaponInfo->Animations.Sprint;
+}
+
+void AWeaponBase::Guard(EInputType InputType)
+{
+	if (InputType == EInputType::Started)
+	{
+		if (OwnerRef->GetCharacterMovement()->IsFalling() ||
+			OwnerRef->CombatComponent->TagContainer.HasAny(OwnerRef->CombatComponent->CantGuardTags))
+		{
+			OwnerRef->CombatComponent->TagContainer.RemoveTag(OwnerRef->CombatComponent->GuardingTag);
+			return;
+		}
+		OwnerRef->CombatComponent->TagContainer.AddTag(OwnerRef->CombatComponent->GuardingTag);
+	}
+	else if (InputType == EInputType::Completed)
+	{
+		OwnerRef->CombatComponent->TagContainer.RemoveTag(OwnerRef->CombatComponent->GuardingTag);
+	}
+	 
 }
 
 // Called when the game starts or when spawned

@@ -8,6 +8,7 @@
 #include "WeaponInfos.generated.h"
 
 
+enum EImpactTypes : int;
 enum EPlayerCharacter : int;
 
 UENUM(Blueprintable, BlueprintType)
@@ -24,6 +25,20 @@ enum EAttackType
 	Block
 };
 
+UENUM(Blueprintable, BlueprintType)
+enum EEightDirection
+{
+	Back,
+	Back_Left,
+	Left,
+	Front_Left,
+	Front,
+	Front_Right,
+	Right,
+	Back_Right,
+};
+
+
 
 USTRUCT(BlueprintType, Blueprintable)
 struct FWeaponAttributes
@@ -35,7 +50,7 @@ struct FWeaponAttributes
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName SocketName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float BaseDamage;
+	float BaseDamage = 10;
 };
 
 
@@ -45,15 +60,21 @@ struct FWeaponAnimations
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FGameplayTag BasicAttackingTag;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<UAnimMontage*> BasicAttacks;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FGameplayTag SprintingTag;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UAnimMontage* Sprint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<TEnumAsByte<EEightDirection>, UAnimMontage*> Stagger_Animations;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* KnockDown_Animation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TMap<TEnumAsByte<EImpactTypes>, UAnimMontage*> Guard_Hit_Animations;
+	
 };
 
 

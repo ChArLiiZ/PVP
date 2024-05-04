@@ -3,10 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "ActorComponents/CombatComponent.h"
-#include "ActorComponents/TagContainerComponent.h"
-#include "Components/MaterialBillboardComponent.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "PVPCharacter.generated.h"
@@ -77,8 +74,7 @@ public:
 	UPROPERTY(BlueprintReadWrite, Replicated)
 	AWeaponBase* WeaponRef;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UTagContainerComponent* TagComponent;
+	
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_LockTarget)
 	AActor* LockTargetRef;
