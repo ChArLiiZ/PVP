@@ -78,6 +78,8 @@ struct FWeaponAnimations
 };
 
 
+
+
 UCLASS(BlueprintType, Blueprintable)
 class PVP_API UWeaponInfos : public UDataAsset
 {
