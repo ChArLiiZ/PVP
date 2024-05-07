@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NiagaraComponent.h"
 #include "GameFramework/Actor.h"
 #include "PVP/DataAssets/WeaponInfos.h"
 #include "WeaponBase.generated.h"
@@ -11,7 +12,7 @@ class APVPCharacter;
 enum EInputType : int;
 
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSpecialAttackChargeCompleted);
 
 UCLASS()
 class PVP_API AWeaponBase : public AActor
@@ -24,12 +25,24 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	UWeaponInfos* WeaponInfo;
+
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float ChargeSeconds = 2;
+	UPROPERTY(BlueprintReadOnly)
+	bool bChargeComplete = false;
+	
+	UPROPERTY(BlueprintAssignable)
+	FOnSpecialAttackChargeCompleted OnSpecialAttackChargeCompletedDelegate;
 	
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* SKMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Mesh_Outline;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UNiagaraComponent* TrailComp;
 
 	UPROPERTY(BlueprintReadWrite, meta=(ExposeOnSpawn), Replicated)
 	APVPCharacter* OwnerRef;
@@ -39,14 +52,17 @@ public:
 	void InitialSetup();
 
 	UFUNCTION(BlueprintCallable)
-	UAnimMontage* BasicAttack(EInputType InputType, float ElapsedSeconds, float TriggeredSeconds);
+	virtual UAnimMontage* BasicAttack(EInputType InputType, float ElapsedSeconds, float TriggeredSeconds);
 	
 	
 	UFUNCTION(BlueprintCallable)
-	UAnimMontage* Sprint(EInputType InputType, FVector InputVector);
+	virtual UAnimMontage* Sprint(EInputType InputType, FVector InputVector);
 
 	UFUNCTION(BlueprintCallable)
-	void Guard(EInputType InputType);
+	virtual void Guard(EInputType InputType);
+
+	UFUNCTION(BlueprintCallable)
+	virtual void SpecialAttack(EInputType InputType, float ElapsedSeconds, float TriggeredSeconds);
 
 	
 

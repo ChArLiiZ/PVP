@@ -51,6 +51,14 @@ struct FWeaponAttributes
 	FName SocketName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float BaseDamage = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float BasicAttackStamina = 10;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SpecialAttackStamina = 30;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float SprintStamina = 20;
+	
 };
 
 
@@ -77,6 +85,22 @@ struct FWeaponAnimations
 	
 };
 
+USTRUCT(BlueprintType, Blueprintable)
+struct FWeaponSounds
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* OnHit_Light;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* OnHit_Heavy;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* OnHit_Guarded_Light;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USoundBase* OnHit_Guarded_Heavy;
+	
+};
+
 
 
 
@@ -91,7 +115,8 @@ public:
 	FWeaponAttributes Attributes;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FWeaponAnimations Animations;
-
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FWeaponSounds Sounds;
+		
 	
 };

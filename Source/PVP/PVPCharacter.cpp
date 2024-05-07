@@ -138,11 +138,11 @@ void APVPCharacter::SetLockTarget(AActor* LockTarget)
 	OnRep_LockTarget(PreviousTarget);
 }
 
-void APVPCharacter::LockToTarget()
+void APVPCharacter::LockToTarget_Implementation()
 {
 	if (LockTargetRef != nullptr)
 	{
-		if (LockTargetRef->GetDistanceTo(this) > 1000)
+		if (LockTargetRef->GetDistanceTo(this) > LockDistance)
 		{
 			SetLockTarget(nullptr);
 			return;

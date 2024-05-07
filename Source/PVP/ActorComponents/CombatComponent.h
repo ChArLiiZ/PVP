@@ -50,9 +50,9 @@ struct FTraceInfo
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedDelegate, float, Before, float, After);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStaminaChangedDelegate, float, Before, float, After);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FGetHitDelegate, UCombatComponent*, Source, FHitResult, HitResult, float, Damage, EImpactTypes, ImpactType);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnGuardDelegate, UCombatComponent*, Source, FHitResult, HitResult, EImpactTypes, ImpactType);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHitDelegate, FHitResult, HitResult, bool, IsGuarded);
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnGuardDelegate, UCombatComponent*, Source, FHitResult, HitResult, float, Damage, EImpactTypes, ImpactType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnHitDelegate, FHitResult, HitResult, bool, IsGuarded, EImpactTypes, ImpactType);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeadDelegate);
 
 
 
@@ -80,14 +80,25 @@ public:
 	UPROPERTY(EditAnywhere, Category="Attributes")
 	float BaseDamage = 10;
 
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_Dead)
+	bool bDead = false;
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<FName, FTraceInfo> TraceInfos;
 
 	//Tags
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tags", Replicated)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Tags", ReplicatedUsing=OnRep_TagContainer)
 	FGameplayTagContainer TagContainer;
 
+	UFUNCTION(BlueprintNativeEvent)
+	void OnRep_TagContainer(FGameplayTagContainer Previous);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Tags")
+	FGameplayTag DeadTag;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Tags")
+	FGameplayTagContainer CantJumpTags;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Tags")
 	FGameplayTag BasicAttackingTag;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Tags")
@@ -100,6 +111,12 @@ public:
 	FGameplayTag GuardingTag;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Tags")
 	FGameplayTagContainer CantGuardTags;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Tags")
+	FGameplayTag ChargingTag;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Tags")
+	FGameplayTag ChargeEndTag;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Tags")
+	FGameplayTagContainer CantSpecialAttackTags;
 	
 
 	//Delegates
@@ -113,6 +130,8 @@ public:
 	FOnGuardDelegate OnGuardDelegate;
 	UPROPERTY(BlueprintAssignable)
 	FOnHitDelegate OnHitDelegate;
+	UPROPERTY(BlueprintAssignable)
+	FOnDeadDelegate OnDeadDelegate;
 
 
 
@@ -126,14 +145,20 @@ public:
 	void OnRep_Health(float PreviousHealth);
 
 
-	UFUNCTION(BlueprintCallable, Category="Attributes", Server, Reliable)
-	void SV_AddStamina(float amount);
+	UFUNCTION(BlueprintCallable, Category="Attributes")
+	bool AddStamina(float amount);
 	
 	UFUNCTION(BlueprintCallable, Category="Attributes")
 	void GetStamina(bool IsPercentage, float& amount);
 
 	UFUNCTION()
 	void OnRep_Stamina(float PreviousHealth);
+
+	UFUNCTION(BlueprintCallable)
+	void SetDead(bool dead);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnRep_Dead();
 
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Combat")

@@ -23,6 +23,10 @@ AWeaponBase::AWeaponBase()
 	Mesh_Outline->SetupAttachment(SKMesh);
 	Mesh_Outline->SetLeaderPoseComponent(SKMesh, true, false);
 
+	TrailComp = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComp"));
+	TrailComp->SetupAttachment(SKMesh);
+	TrailComp->SetAutoActivate(false);
+
 	SetReplicates(true);
 }
 
@@ -39,17 +43,28 @@ void AWeaponBase::InitialSetup_Implementation()
 
 UAnimMontage* AWeaponBase::BasicAttack(EInputType InputType, float ElapsedSeconds, float TriggeredSeconds)
 {
-	int32 MontageIndex = 0;
+	
 
 	if (InputType != Started)
 	{
 		return nullptr;
 	}
+
+	
+
+	
+	
+	int32 MontageIndex = 0;
 	
 	if (OwnerRef->GetCharacterMovement()->IsFalling() ||
 		OwnerRef->CombatComponent->TagContainer.HasAny(OwnerRef->CombatComponent->CantBasicAttackTags))
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("Can't Basic Attack"));
+		return nullptr;
+	}
+	
+	if (!OwnerRef->CombatComponent->AddStamina(WeaponInfo->Attributes.BasicAttackStamina * -1))
+	{
 		return nullptr;
 	}
 	
@@ -75,11 +90,19 @@ UAnimMontage* AWeaponBase::BasicAttack(EInputType InputType, float ElapsedSecond
 UAnimMontage* AWeaponBase::Sprint(EInputType InputType, FVector InputVector)
 {
 	
+
+	
 	if (OwnerRef->GetCharacterMovement()->IsFalling() ||
 		OwnerRef->CombatComponent->TagContainer.HasAny(OwnerRef->CombatComponent->CantSprintTags))
 	{
 		return nullptr;
 	}
+	
+	if (!OwnerRef->CombatComponent->AddStamina(WeaponInfo->Attributes.SprintStamina * -1))
+	{
+		return nullptr;
+	}
+	
 	if (InputVector.Length() >= 0)
 	{
 		OwnerRef->SetActorRotation(UKismetMathLibrary::MakeRotFromX(InputVector));
@@ -92,6 +115,12 @@ void AWeaponBase::Guard(EInputType InputType)
 {
 	if (InputType == EInputType::Started)
 	{
+		float Stamina;
+		OwnerRef->CombatComponent->GetStamina(false, Stamina);
+		if (Stamina <= 0)
+		{
+			return;
+		}
 		if (OwnerRef->GetCharacterMovement()->IsFalling() ||
 			OwnerRef->CombatComponent->TagContainer.HasAny(OwnerRef->CombatComponent->CantGuardTags))
 		{
@@ -106,6 +135,12 @@ void AWeaponBase::Guard(EInputType InputType)
 	}
 	 
 }
+
+void AWeaponBase::SpecialAttack(EInputType InputType, float ElapsedSeconds, float TriggeredSeconds)
+{
+	
+}
+
 
 // Called when the game starts or when spawned
 void AWeaponBase::BeginPlay()

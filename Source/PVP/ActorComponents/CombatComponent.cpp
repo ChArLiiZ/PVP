@@ -20,6 +20,11 @@ UCombatComponent::UCombatComponent()
 	// ...
 }
 
+void UCombatComponent::OnRep_TagContainer_Implementation(FGameplayTagContainer Previous)
+{
+	
+}
+
 
 void UCombatComponent::SV_AddHealth_Implementation(float amount)
 {
@@ -29,6 +34,10 @@ void UCombatComponent::SV_AddHealth_Implementation(float amount)
 		CurrentHealth = MaxHealth;
 	if (CurrentHealth < 0)
 		CurrentHealth = 0;
+
+	if (CurrentHealth <= 0)
+		SetDead(true);
+	
 
 	
 	OnRep_Health(PreviousHealth);
@@ -66,23 +75,39 @@ void UCombatComponent::GetStamina(bool IsPercentage, float& amount)
 
 void UCombatComponent::OnRep_Stamina(float PreviousStamina)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Before: %f, After: %f"), PreviousStamina, CurrentStamina);
-	OnHealthChangedDelegate.Broadcast(PreviousStamina, CurrentStamina);
+	
+	OnStaminaChangedDelegate.Broadcast(PreviousStamina, CurrentStamina);
+}
+
+void UCombatComponent::SetDead(bool dead)
+{
+	this->bDead = dead;
+	OnRep_Dead();
+}
+
+void UCombatComponent::OnRep_Dead_Implementation()
+{
+	if (bDead == true)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s is Dead"), *GetOwner()->GetName())
+		OnDeadDelegate.Broadcast();
+	}
 }
 
 
-
-void UCombatComponent::SV_AddStamina_Implementation(float amount)
+bool UCombatComponent::AddStamina(float amount)
 {
 	float PreviousStamina = CurrentStamina;
+	if ((CurrentStamina + amount) < 0)
+	{
+		return false;
+	}
 	CurrentStamina += amount;
 	if (CurrentStamina > MaxStamina)
 		CurrentStamina = MaxStamina;
-	if (CurrentStamina < 0)
-		CurrentStamina = 0;
-
 	
-	OnRep_Health(PreviousStamina);
+	OnRep_Stamina(PreviousStamina);
+	return true;
 }
 
 
@@ -162,14 +187,14 @@ void UCombatComponent::Timer_Trace()
 				{
 					if (TargetCombatComponent->TagContainer.HasTag(GuardingTag))
 					{
-						TargetCombatComponent->OnGuardDelegate.Broadcast(this, HitResult, TraceInfo.Value.ImpactType);
-						OnHitDelegate.Broadcast(HitResult, true);
+						TargetCombatComponent->OnGuardDelegate.Broadcast(this, HitResult, BaseDamage * TraceInfo.Value.DamageRatio, TraceInfo.Value.ImpactType);
+						OnHitDelegate.Broadcast(HitResult, true, TraceInfo.Value.ImpactType);
 					}
 					else
 					{
 						TargetCombatComponent->SV_DealDamage(BaseDamage * TraceInfo.Value.DamageRatio,
 														HitResult, this, TraceInfo.Value.ImpactType);
-						OnHitDelegate.Broadcast(HitResult, false);
+						OnHitDelegate.Broadcast(HitResult, false, TraceInfo.Value.ImpactType);
 					}
 					
 				}

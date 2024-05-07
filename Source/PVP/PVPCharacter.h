@@ -82,6 +82,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* LockedIcon;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float LockDistance = 1000;
 
 	UFUNCTION(BlueprintNativeEvent)
 	void OnRep_LockTarget(AActor* PreviousTarget);
@@ -89,7 +91,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetLockTarget(AActor* LockTarget);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintNativeEvent)
 	void LockToTarget();
 
 
