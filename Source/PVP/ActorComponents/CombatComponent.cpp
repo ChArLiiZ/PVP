@@ -14,7 +14,7 @@ UCombatComponent::UCombatComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	//SetIsReplicatedByDefault(true);
+
 	
 	
 	// ...
@@ -127,6 +127,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UCombatComponent, CurrentHealth);
 	DOREPLIFETIME(UCombatComponent, CurrentStamina);
 	DOREPLIFETIME(UCombatComponent, TagContainer);
+	DOREPLIFETIME(UCombatComponent, bDead);
 }
 
 

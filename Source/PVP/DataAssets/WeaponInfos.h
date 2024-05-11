@@ -71,7 +71,7 @@ struct FWeaponAnimations
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UAnimBlueprint* AnimBP;
+	TSubclassOf<UAnimInstance> AnimBP;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<UAnimMontage*> BasicAttacks;

@@ -27,7 +27,7 @@ AWeaponBase::AWeaponBase()
 	TrailComp->SetupAttachment(SKMesh);
 	TrailComp->SetAutoActivate(false);
 
-	SetReplicates(true);
+	bReplicates = true;
 }
 
 void AWeaponBase::InitialSetup_Implementation()
@@ -38,9 +38,13 @@ void AWeaponBase::InitialSetup_Implementation()
 	
 	SetOwner(OwnerRef->Owner);
 	OwnerRef->CombatComponent->BaseDamage = WeaponInfo->Attributes.BaseDamage;
-	OwnerRef->GetMesh()->SetAnimInstanceClass(WeaponInfo->Animations.AnimBP->GeneratedClass);
+	OwnerRef->GetMesh()->SetAnimInstanceClass(WeaponInfo->Animations.AnimBP);
 }
 
+
+void AWeaponBase::AdditionalSetup_Implementation(USkeletalMeshComponent* SkeletalMesh)
+{
+}
 
 UAnimMontage* AWeaponBase::BasicAttack(EInputType InputType, float ElapsedSeconds, float TriggeredSeconds)
 {
@@ -201,7 +205,11 @@ void AWeaponBase::Trail_Implementation(bool IsStart, int32 Index)
 void AWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
-	InitialSetup();
+	if (OwnerRef)
+	{
+		InitialSetup();
+	}
+	
 	
 	
 }

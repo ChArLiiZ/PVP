@@ -51,6 +51,9 @@ public:
 	UFUNCTION(BlueprintNativeEvent)
 	void InitialSetup();
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void AdditionalSetup(USkeletalMeshComponent* SkeletalMesh);
+
 	UFUNCTION(BlueprintCallable)
 	virtual UAnimMontage* BasicAttack(EInputType InputType, float ElapsedSeconds, float TriggeredSeconds);
 	
