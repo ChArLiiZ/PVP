@@ -14,7 +14,9 @@ enum EPlayerCharacter : int;
 UENUM(Blueprintable, BlueprintType)
 enum EWeaponTypes
 {
-	Katana
+	Katana,
+	Halberd,
+	Gaunlet
 };
 
 UENUM(Blueprintable, BlueprintType)
@@ -68,9 +70,14 @@ struct FWeaponAnimations
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimBlueprint* AnimBP;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<UAnimMontage*> BasicAttacks;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* SpecialAttack;
 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

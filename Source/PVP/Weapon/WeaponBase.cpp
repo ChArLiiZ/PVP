@@ -38,6 +38,7 @@ void AWeaponBase::InitialSetup_Implementation()
 	
 	SetOwner(OwnerRef->Owner);
 	OwnerRef->CombatComponent->BaseDamage = WeaponInfo->Attributes.BaseDamage;
+	OwnerRef->GetMesh()->SetAnimInstanceClass(WeaponInfo->Animations.AnimBP->GeneratedClass);
 }
 
 
@@ -138,7 +139,61 @@ void AWeaponBase::Guard(EInputType InputType)
 
 void AWeaponBase::SpecialAttack(EInputType InputType, float ElapsedSeconds, float TriggeredSeconds)
 {
+	if (OwnerRef->GetCharacterMovement()->IsFalling() || OwnerRef->CombatComponent->TagContainer.HasAny(OwnerRef->CombatComponent->CantSpecialAttackTags))
+	{
+		return;
+	}
+
 	
+
+	
+	
+	if (InputType == EInputType::Started)
+	{
+		float temp;
+		OwnerRef->CombatComponent->GetStamina(false, temp);
+		if (temp < WeaponInfo->Attributes.SpecialAttackStamina)
+		{
+			OwnerRef->CombatComponent->TagContainer.RemoveTag(OwnerRef->CombatComponent->ChargingTag);
+			return;
+		}
+		OwnerRef->CombatComponent->TagContainer.AddTag(OwnerRef->CombatComponent->ChargingTag);
+		bChargeComplete = false;
+	}
+
+	if (InputType == EInputType::Triggered)
+	{
+		if (TriggeredSeconds >= ChargeSeconds && bChargeComplete == false)
+		{
+			bChargeComplete = true;
+			OnSpecialAttackChargeCompletedDelegate.Broadcast();
+		}
+	}
+
+	if (InputType == EInputType::Completed || InputType == EInputType::Canceled)
+	{
+		
+		if (bChargeComplete)
+		{
+			OwnerRef->CombatComponent->TagContainer.AddTag(OwnerRef->CombatComponent->ChargeEndTag);
+		}
+		OwnerRef->CombatComponent->TagContainer.RemoveTag(OwnerRef->CombatComponent->ChargingTag);
+		bChargeComplete = false;
+		
+	}
+	
+}
+
+void AWeaponBase::Trail_Implementation(bool IsStart, int32 Index)
+{
+	if (IsStart)
+	{
+		TrailComp->Activate(false);
+	}
+	else
+	{
+		TrailComp->Deactivate();
+	}
 }
 
 

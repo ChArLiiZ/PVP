@@ -64,7 +64,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void SpecialAttack(EInputType InputType, float ElapsedSeconds, float TriggeredSeconds);
 
-	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void Trail(bool IsStart, int32 Index);
 
 protected:
 	// Called when the game starts or when spawned

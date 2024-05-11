@@ -31,7 +31,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void SpecialAttack(EInputType InputType, float ElapsedSeconds, float TriggeredSeconds) override;
+	
 
 	
 };

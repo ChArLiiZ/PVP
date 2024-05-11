@@ -3,9 +3,6 @@
 
 #include "Katana.h"
 
-#include "NiagaraScript.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "PVP/PVPCharacter.h"
 
 
 // Sets default values
@@ -22,55 +19,7 @@ void AKatana::BeginPlay()
 	
 }
 
-void AKatana::SpecialAttack(EInputType InputType, float ElapsedSeconds, float TriggeredSeconds)
-{
-	Super::SpecialAttack(InputType, ElapsedSeconds, TriggeredSeconds);
 
-	if (OwnerRef->GetCharacterMovement()->IsFalling() || OwnerRef->CombatComponent->TagContainer.HasAny(OwnerRef->CombatComponent->CantSpecialAttackTags))
-	{
-		return;
-	}
-
-	
-
-	
-	
-	if (InputType == EInputType::Started)
-	{
-		float temp;
-		OwnerRef->CombatComponent->GetStamina(false, temp);
-		if (temp < WeaponInfo->Attributes.SpecialAttackStamina)
-		{
-			OwnerRef->CombatComponent->TagContainer.RemoveTag(OwnerRef->CombatComponent->ChargingTag);
-			return;
-		}
-		OwnerRef->CombatComponent->TagContainer.AddTag(OwnerRef->CombatComponent->ChargingTag);
-		bChargeComplete = false;
-	}
-
-	if (InputType == EInputType::Triggered)
-	{
-		if (TriggeredSeconds >= ChargeSeconds && bChargeComplete == false)
-		{
-			bChargeComplete = true;
-			OnSpecialAttackChargeCompletedDelegate.Broadcast();
-		}
-	}
-
-	if (InputType == EInputType::Completed || InputType == EInputType::Canceled)
-	{
-		
-		if (bChargeComplete)
-		{
-			OwnerRef->CombatComponent->TagContainer.AddTag(OwnerRef->CombatComponent->ChargeEndTag);
-		}
-		OwnerRef->CombatComponent->TagContainer.RemoveTag(OwnerRef->CombatComponent->ChargingTag);
-		bChargeComplete = false;
-		
-	}
-	
-	
-}
 
 
 

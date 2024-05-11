@@ -13,6 +13,7 @@
 #include "Components/MaterialBillboardComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
+#include "Weapon/WeaponBase.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -63,6 +64,9 @@ APVPCharacter::APVPCharacter()
 	
 }
 
+
+
+
 void APVPCharacter::BeginPlay()
 {
 	// Call the base class  
@@ -89,7 +93,34 @@ void APVPCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(APVPCharacter, WeaponRef);
 	DOREPLIFETIME(APVPCharacter, LockTargetRef);
+	DOREPLIFETIME(APVPCharacter, WeaponType);
 }
+
+void APVPCharacter::OnRep_WeaponType_Implementation()
+{
+	if (WeaponRef)
+	{
+		WeaponRef->Destroy();
+	}
+	
+}
+
+void APVPCharacter::ChangeWeaponType(EWeaponTypes Type)
+{
+	if (!Type == this->WeaponType)
+	{
+		this->WeaponType = Type;
+		OnRep_WeaponType();
+	}
+	else if (!WeaponRef)
+	{
+		OnRep_WeaponType();
+	}
+}
+
+
+
+
 
 //////////////////////////////////////////////////////////////////////////
 // Input

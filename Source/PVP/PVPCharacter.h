@@ -8,6 +8,7 @@
 #include "Logging/LogMacros.h"
 #include "PVPCharacter.generated.h"
 
+enum EWeaponTypes : int;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -71,6 +72,22 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ActorComponents")
 	UCombatComponent* CombatComponent;
 
+	//Weapon
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TMap<TEnumAsByte<EWeaponTypes>, TSoftClassPtr<AWeaponBase>> WeaponBPs;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, meta=(ExposeOnSpawn))
+	TEnumAsByte<EWeaponTypes> WeaponType;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void OnRep_WeaponType();
+
+	UFUNCTION(BlueprintCallable)
+	void ChangeWeaponType(EWeaponTypes Type);
+
+	
+	
 	UPROPERTY(BlueprintReadWrite, Replicated)
 	AWeaponBase* WeaponRef;
 
