@@ -10,7 +10,6 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
-#include "Components/MaterialBillboardComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapon/WeaponBase.h"
@@ -107,7 +106,7 @@ void APVPCharacter::OnRep_WeaponType_Implementation()
 
 void APVPCharacter::ChangeWeaponType(EWeaponTypes Type)
 {
-	if (!Type == this->WeaponType)
+	if (Type != this->WeaponType)
 	{
 		this->WeaponType = Type;
 		OnRep_WeaponType();

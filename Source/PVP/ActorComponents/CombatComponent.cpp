@@ -14,7 +14,7 @@ UCombatComponent::UCombatComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	SetIsReplicated(true);
+	SetIsReplicatedByDefault(true);
 	
 	
 	// ...
@@ -164,9 +164,18 @@ void UCombatComponent::Timer_Trace()
 		TArray<AActor*> ActorsIgnore;
 		ActorsIgnore.Add(GetOwner());
 		TArray<FHitResult> HitResults;
+		FVector EndLocation;
+		if (TraceInfo.Value.Start == TraceInfo.Value.End)
+		{
+			EndLocation = TraceInfo.Value.SKMesh->GetSocketLocation(TraceInfo.Value.End) + FVector(0, 0, 0.01);
+		}
+		else
+		{
+			EndLocation = TraceInfo.Value.SKMesh->GetSocketLocation(TraceInfo.Value.End);
+		}
 		UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(),
 			TraceInfo.Value.SKMesh->GetSocketLocation(TraceInfo.Value.Start),
-			TraceInfo.Value.SKMesh->GetSocketLocation(TraceInfo.Value.End),
+			EndLocation,
 			TraceInfo.Value.Radius,
 			ObjectTypesArray,
 			false,
