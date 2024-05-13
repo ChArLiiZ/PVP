@@ -59,6 +59,8 @@ APVPCharacter::APVPCharacter()
 	LockedIcon->SetupAttachment(RootComponent);
 	LockedIcon->SetVisibility(false);
 
+	GetMesh()->bOnlyAllowAutonomousTickPose = true;
+
 	
 	
 }
