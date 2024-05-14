@@ -58,8 +58,7 @@ APVPCharacter::APVPCharacter()
 	LockedIcon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LockedIcon"));
 	LockedIcon->SetupAttachment(RootComponent);
 	LockedIcon->SetVisibility(false);
-
-	GetMesh()->bOnlyAllowAutonomousTickPose = true;
+	
 
 	
 	
@@ -87,6 +86,21 @@ void APVPCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	LockToTarget();
+	if (auto* tempMesh = GetMesh())
+	{
+		if (tempMesh && IsReplicatingMovement() && (GetRemoteRole() == ROLE_AutonomousProxy && GetNetConnection() != nullptr))
+		{
+			if (HasAnyRootMotion())
+			{
+				tempMesh->bOnlyAllowAutonomousTickPose = true;
+			}
+			else
+			{
+				tempMesh->bOnlyAllowAutonomousTickPose = false;
+			}
+		}
+	}
+	
 }
 
 void APVPCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -99,10 +113,6 @@ void APVPCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 
 void APVPCharacter::OnRep_WeaponType_Implementation()
 {
-	if (WeaponRef)
-	{
-		WeaponRef->Destroy();
-	}
 	
 }
 
