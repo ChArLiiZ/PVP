@@ -89,6 +89,11 @@ struct FWeaponAnimations
 	UAnimMontage* KnockDown_Animation;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TMap<TEnumAsByte<EImpactTypes>, UAnimMontage*> Guard_Hit_Animations;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* Execute_Animation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* Get_Executed_Animation;
 	
 };
 

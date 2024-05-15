@@ -5,6 +5,7 @@
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "PVP/PVPCharacter.h"
 #include "PVP/DataAssets/WeaponInfos.h"
@@ -149,11 +150,9 @@ void AWeaponBase::SpecialAttack(EInputType InputType, float ElapsedSeconds, floa
 	}
 
 	
-
-	
-	
 	if (InputType == EInputType::Started)
 	{
+		
 		float temp;
 		OwnerRef->CombatComponent->GetStamina(false, temp);
 		if (temp < WeaponInfo->Attributes.SpecialAttackStamina)
@@ -167,6 +166,11 @@ void AWeaponBase::SpecialAttack(EInputType InputType, float ElapsedSeconds, floa
 
 	if (InputType == EInputType::Triggered)
 	{
+		if (!OwnerRef->CombatComponent->TagContainer.HasTag(OwnerRef->CombatComponent->ChargingTag))
+		{
+			return;
+		}
+		
 		if (TriggeredSeconds >= ChargeSeconds && bChargeComplete == false)
 		{
 			bChargeComplete = true;
@@ -176,6 +180,10 @@ void AWeaponBase::SpecialAttack(EInputType InputType, float ElapsedSeconds, floa
 
 	if (InputType == EInputType::Completed || InputType == EInputType::Canceled)
 	{
+		if (!OwnerRef->CombatComponent->TagContainer.HasTag(OwnerRef->CombatComponent->ChargingTag))
+		{
+			return;
+		}
 		
 		if (bChargeComplete)
 		{
